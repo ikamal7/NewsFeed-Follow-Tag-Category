@@ -1,0 +1,13 @@
+{
+    "name": "kamal/newsfeed-follow-category",
+    "type": "wordpress-plugin",
+    "license": "GPLv2",
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+        "psr-4": {
+            "KAMAL\\NFC\\":"includes/"
+        },
+        "files": []
+    }
+}
