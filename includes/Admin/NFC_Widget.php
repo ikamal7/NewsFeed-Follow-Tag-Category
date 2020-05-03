@@ -10,16 +10,26 @@ class NFC_Widget extends \WP_Widget {
         parent::__construct( 'nfc_wiget', __( 'NFC Category', 'nfc' ), $widget_options );
 
         add_action( 'wp_ajax_nfc_ajax_get_id', [$this, 'nfc_ajax_get_id'] );
-        add_action( 'wp_ajax_nopriv_nfc_ajax_get_id', [$this, 'nfc_ajax_get_id'] );
+        add_action( 'wp_ajax_nopriv_nfc_ajax_get_id', [$this, 'nfc_ajax_get_id_no'] );
     }
 
     /**
      * @return mixed
      */
     public function nfc_ajax_get_id() {
-        $data = isset( $_POST["data"] );
-        return $data;
-        die();
+        if ( is_user_logged_in() ) {
+            $data         = isset( $_POST["data"] ) ? $_POST["data"] : '';
+            $cat_ids      = serialize( $data );
+            $current_user = wp_get_current_user();
+            update_user_meta( $current_user->ID, 'post_cat_ids', $cat_ids );
+
+            echo $data;
+            die();
+        }
+    }
+
+    public function nfc_ajax_get_id_no() {
+        echo "you're not logged in, please login first.";
     }
 
     function nfc_widget_reg() {
@@ -30,22 +40,25 @@ class NFC_Widget extends \WP_Widget {
      * @param $instance
      */
     public function widget( $args, $instance ) {
-
+        //print_r();
         echo $args['before_widget'];
         if ( !empty( $instance['title'] ) ) {
             echo $args['before_title'] . apply_filters( 'widget_title', $instance['title'] ) . $args['after_title'];
         }
-        echo "id=" . $this->nfc_ajax_get_id();
+
         $categories = get_categories( array(
             'taxonomy'   => 'category',
             'orderby'    => 'name',
             'parent'     => 0,
             'hide_empty' => 0,
         ) );
+        echo "<div>";
+        print_r( get_user_meta( wp_get_current_user()->ID, 'post_cat_ids', true ) );
+        echo "</div>";
         echo "<ul class='nfc-category-list'>";
-
+        //$this->nfc_ajax_get_id();
         foreach ( $categories as $category ):
-            printf( '<li data-cat-id="%s">%s <a href="#" class="follow-cat">%s</a></li>', esc_attr( $category->term_id ), esc_html( $category->name ), __( 'Follow', 'nfc' ) );
+            printf( '<li>%s <a data-cat-id="%s" href="#" class="follow-cat">%s</a></li>', esc_html( $category->name ), esc_attr( $category->term_id ), __( 'Follow', 'nfc' ) );
         endforeach;
         echo "</ul>";
         echo $args['after_widget'];

@@ -2,34 +2,26 @@
 
     //alert(nfc_data.ajax_url);
 
-    $(document).ready(function () {
+    $(document).ready(function ($) {
         $('.nfc-category-list li a').on('click', function (e) {
-            e.preventDefault();
-
-            let catid = $(this).parent('li').data('cat-id');
-            //alert(id);
-            //$(this).text('unfollow');
+            let catid = $(this).data('cat-id');
             $.ajax({
-                url: nfc_data.ajax_url,
+                url:nfc_data.ajax_url,
                 type: 'post',
-                data: {
+                data:{ 
                     action: 'nfc_ajax_get_id',
-                    'data': 'nice',
-                },
-                dataType: 'json',
-                success: function (data) {
-                    alert(data);
-                },
-                error: function (errorThrown) {
-                    alert(errorThrown);
+                    data: catid
                 }
+            }).done (function (response) {
+                if(response){
+                    $(this).text('unfollow');
+                    console.log(response);
+                }else{
+                    alert(response);
+                }
+               
             });
-
-            // $.post(nfc_data.ajax_url, {action:'nfc_get_id', data: catid},function(data){
-            //     console.log(data);
-            // });
-
-
+            e.preventDefault();
         });
     });
 
