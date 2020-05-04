@@ -1,17 +1,17 @@
 <?php
 namespace KAMAL\NFC\Admin;
 
-class NFC_Widget extends \WP_Widget {
+class NFC_Tag_Widget extends \WP_Widget {
     public function __construct() {
         $widget_options = [
-            'classname'   => 'nfc_widget',
-            'description' => __( 'NFC Widget to display post category with follow button', 'nfc' ),
+            'classname'   => 'nfc_tag_widget',
+            'description' => __( 'NFC Tag Widget to display post category with follow button', 'nfc' ),
         ];
-        parent::__construct( 'nfc_widget', __( 'NFC Category', 'nfc' ), $widget_options );
+        parent::__construct( 'nfc_tag_widget', __( 'NFC Tag Widget', 'nfc' ), $widget_options );
 
-        add_action( 'wp_ajax_nfc_ajax_get_id', [$this, 'nfc_ajax_get_id'] );
-        add_action( 'wp_ajax_nopriv_nfc_ajax_get_id', [$this, 'nfc_ajax_get_id_no'] );
-        add_action( 'pre_get_posts', [$this, 'set_posts_cat'] );
+        add_action( 'wp_ajax_nfc_tag_ajax_get_id', [$this, 'nfc_ajax_get_tags_id'] );
+        add_action( 'wp_ajax_nopriv_nfc_tag_ajax_get_id', [$this, 'nfc_ajax_get_tags_id_no'] );
+        add_action( 'pre_get_posts', [$this, 'set_posts_tags'] );
     }
 
     /**
@@ -19,19 +19,19 @@ class NFC_Widget extends \WP_Widget {
      *
      * @param $query
      */
-    public function set_posts_cat( $q ) {
+    public function set_posts_tags( $q ) {
         if ( is_user_logged_in() ) { // First check if we have a logged in user before doing anything
             if ( $q->is_home() // Only targets the main page, home page
                  && $q->is_main_query() // Only targets the main query
             ) {
-                if ( is_active_widget( false, false, 'nfc_widget', true ) ) {
+                if ( is_active_widget( false, false, 'nfc_tag_widget', true ) ) {
                     // Get the current logged in user obejct
                     $current_logged_in_user = wp_get_current_user();
 
                     $term = get_user_meta( $current_logged_in_user->ID, 'post_tag_ids', true );
 
                     if ( $term ) {
-                        $q->set( 'cat', $term );
+                        $q->set( 'tag__in', $term );
                     }
                 }
             }
@@ -42,9 +42,11 @@ class NFC_Widget extends \WP_Widget {
     /**
      * Save, Remove category ID in user meta.
      *
-     * @return mixed
+     * @return array
+     * @return string
+     * @return JSON
      */
-    public function nfc_ajax_get_id() {
+    public function nfc_ajax_get_tags_id() {
         global $wpdb;
 
         if ( !isset( $_POST ) || empty( $_POST ) || !is_user_logged_in() ) {
@@ -61,7 +63,7 @@ class NFC_Widget extends \WP_Widget {
             if (  ( $key = array_search( $id_to_add, $saved_ids ) ) !== false ) {
                 unset( $saved_ids[$key] );
                 update_user_meta( $current_user->ID, 'post_tag_ids', $saved_ids );
-                echo wp_send_json( ['value' => sanitize_key( 'unfollowed' )] );
+                return wp_send_json( ['value' => sanitize_key( 'unfollowed' )] );
             }
 
         } else {
@@ -75,7 +77,7 @@ class NFC_Widget extends \WP_Widget {
 
             if ( update_user_meta( $current_user->ID, 'post_tag_ids', $saved_ids ) ) {
                 //echo $id_to_add;
-                echo wp_send_json( ['value' => sanitize_key( 'followed' )] );
+                return wp_send_json( ['value' => sanitize_key( 'followed' )] );
             } else {
                 echo __( 'Failed: Could not update user meta.', 'nfc' );
             }
@@ -90,7 +92,7 @@ class NFC_Widget extends \WP_Widget {
      *
      * @return string
      */
-    public function nfc_ajax_get_id_no() {
+    public function nfc_ajax_get_tags_id_no() {
         echo __( "you're not logged in, please login first.", 'nfc' );
     }
 
@@ -99,7 +101,7 @@ class NFC_Widget extends \WP_Widget {
      *
      * @return void
      */
-    public function nfc_widget_reg() {
+    public function nfc_tag_widget_reg() {
         register_widget( $this );
     }
     /**
@@ -117,44 +119,42 @@ class NFC_Widget extends \WP_Widget {
         $current_logged_in_user = wp_get_current_user();
         $user_followed_ids      = get_user_meta( $current_logged_in_user->ID, 'post_tag_ids', true );
 
-        $categories = get_categories( array(
-            'taxonomy'   => 'category',
-            'orderby'    => 'name',
-            'parent'     => 0,
-            'hide_empty' => 0,
-            'exclude'    => $user_followed_ids,
-        ) );
-
-        $follow_cat_lists = get_categories( array(
-            'taxonomy'   => 'category',
-            'orderby'    => 'name',
-            'parent'     => 0,
-            'hide_empty' => 0,
+        $followed_tags = get_terms( array(
+            'taxonomy'   => 'post_tag',
+            'hide_empty' => false,
             'include'    => $user_followed_ids,
         ) );
 
-        echo "<ul class='nfc-category-list'>";
-        echo "<div class='nfc-my-category-list'>";
+        $all_tags = get_terms( array(
+            'taxonomy'   => 'post_tag',
+            'hide_empty' => false,
+            'exclude'    => $user_followed_ids,
+        ) );
+
+        echo "<ul class='nfc-tag-list'>";
+
         if ( is_user_logged_in() ):
 
             if ( !empty( $user_followed_ids ) ):
-                echo "<h2>" . esc_html( 'My Category', 'nfc' ) . "</h2>";
-                foreach ( $follow_cat_lists as $follow_cat_list ):
-                    printf( '<li>%s <a data-cat-id="%s" href="#" class="follow-cat">%s</a></li>', esc_html( $follow_cat_list->name ), esc_attr( $follow_cat_list->term_id ), __( 'Unfollow', 'nfc' ) );
-
+                echo "<div class='nfc-my-tag-list'>";
+                echo "<h2>" . esc_html( "My tags", "nfc" ) . "</h2>";
+                foreach ( $followed_tags as $followed_tag ):
+                    printf( '<li>#%s <a data-tag-id="%s" href="#" class="follow-cat">%s</a></li>', esc_html( $followed_tag->name ), esc_attr( $followed_tag->term_id ), __( 'Unfollow', 'nfc' ) );
                 endforeach;
+                echo "</div>";
             endif;
         endif;
-        echo "</div>";
-        echo "<div class='nfc-all-category-list'>";
-        echo "<h2>" . esc_html( 'Popular Category', 'nfc' ) . "</h2>";
-        if ( !empty( $categories ) ):
-            foreach ( $categories as $category ):
-                printf( '<li>%s <a data-cat-id="%s" href="#" class="follow-cat">%s</a></li>', esc_html( $category->name ), esc_attr( $category->term_id ), __( 'Follow', 'nfc' ) );
+
+        if ( !empty( $all_tags ) ):
+            echo "<div class='nfc-all-tags-list'>";
+            echo "<h2>" . esc_html( "Popular tags", "nfc" ) . "</h2>";
+            foreach ( $all_tags as $single_tag ):
+                //var_dump( $category );
+                printf( '<li>#%s <a data-tag-id="%s" href="#" class="follow-cat">%s</a></li>', esc_html( $single_tag->name ), esc_attr( $single_tag->term_id ), __( 'Follow', 'nfc' ) );
             endforeach;
+            echo "</div>";
         endif;
-        echo "</div>";
-        echo "</ul>";
+
         echo $args['after_widget'];
     }
 
@@ -165,7 +165,7 @@ class NFC_Widget extends \WP_Widget {
      * @return void
      */
     public function form( $instance ) {
-        $title = !empty( $instance['title'] ) ? $instance['title'] : esc_html__( 'Follow Category', 'nfc' );
+        $title = !empty( $instance['title'] ) ? $instance['title'] : esc_html__( 'Follow Tag', 'nfc' );
         ?>
 		<p>
 		<label for="<?php echo esc_attr( $this->get_field_id( 'title' ) ); ?>"><?php esc_attr_e( 'Title:', 'nfc' );?></label>

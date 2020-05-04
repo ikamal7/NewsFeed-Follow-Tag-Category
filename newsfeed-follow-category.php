@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name: NewsFeed Follow Category
+ * Plugin Name: Follow Tags & Categories
  * Plugin URI:https://pixelplugin.co
  * Description: Follow newsfeed for user's
  * Version: 1.0
@@ -24,6 +24,7 @@ class NewsfeedFolllow {
         add_action( 'plugins_loaded', [$this, 'plugin_init'] );
         add_action( 'wp_enqueue_scripts', [$this, 'nfc_enqueue_script'] );
         add_action( 'widgets_init', [new \KAMAL\NFC\Admin\NFC_Widget, 'nfc_widget_reg'] );
+        add_action( 'widgets_init', [new \KAMAL\NFC\Admin\NFC_Tag_Widget, 'nfc_tag_widget_reg'] );
         register_activation_hook( __FILE__, [$this, 'activate'] );
 
     }
@@ -58,6 +59,7 @@ class NewsfeedFolllow {
      * @return void
      */
     public function define_constant() {
+        define( 'NFC_VERSION', '1.0' );
         define( 'NFC_FILE', __FILE__ );
         define( 'NFC_PATH', __DIR__ );
         define( 'NFC_URL', plugins_url( '', NFC_FILE ) );
@@ -92,6 +94,7 @@ class NewsfeedFolllow {
                 'ajax_url' => admin_url( 'admin-ajax.php' ),
             ]
         );
+        wp_enqueue_style( 'nfc_style', NFC_ASSETS . '/css/nfc_style.css', null, NFC_VERSION, 'all' );
     }
 
 }

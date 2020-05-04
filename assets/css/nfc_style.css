@@ -1,0 +1,36 @@
+ul.nfc-category-list, ul.nfc-tag-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+ul.nfc-category-list li, ul.nfc-tag-list li {
+    display: block;
+    padding: 10px 0;
+    font-size: 17px;
+}
+
+.nfc-category-list, .nfc-tag-list {
+    height: 500px;
+    overflow-y: scroll;
+}
+
+.nfc-all-category-list, .nfc-all-tags-list {
+    margin-top: 25px;
+}
+
+.nfc-category-list a, .nfc-tag-list a {
+    color: #000;
+    background: #dfe20f;
+    display: inline-block;
+    padding: 5px;
+    text-transform: capitalize;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.nfc-category-list li:hover a, .nfc-tag-list li:hover a {
+    visibility: visible;
+    opacity: 1;
+    background: #dfe20f;
+}
