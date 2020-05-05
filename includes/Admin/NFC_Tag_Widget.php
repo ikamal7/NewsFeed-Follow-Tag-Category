@@ -149,7 +149,6 @@ class NFC_Tag_Widget extends \WP_Widget {
             echo "<div class='nfc-all-tags-list'>";
             echo "<h2>" . esc_html( "Popular tags", "nfc" ) . "</h2>";
             foreach ( $all_tags as $single_tag ):
-                //var_dump( $category );
                 printf( '<li>#%s <a data-tag-id="%s" href="#" class="follow-cat">%s</a></li>', esc_html( $single_tag->name ), esc_attr( $single_tag->term_id ), __( 'Follow', 'nfc' ) );
             endforeach;
             echo "</div>";
