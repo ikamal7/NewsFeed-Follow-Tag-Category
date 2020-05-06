@@ -140,7 +140,7 @@ class NFC_Widget extends \WP_Widget {
             if ( !empty( $user_followed_ids ) ):
                 echo "<h2>" . esc_html( 'My Category', 'nfc' ) . "</h2>";
                 foreach ( $follow_cat_lists as $follow_cat_list ):
-                    printf( '<li>%s <a data-cat-id="%s" href="#" class="follow-cat">%s</a></li>', esc_html( $follow_cat_list->name ), esc_attr( $follow_cat_list->term_id ), __( 'Unfollow', 'nfc' ) );
+                    printf( '<li>%s <a data-cat-id="%s" href="javascript:void(0)" class="follow-cat">%s</a></li>', esc_html( $follow_cat_list->name ), esc_attr( $follow_cat_list->term_id ), __( 'Unfollow', 'nfc' ) );
 
                 endforeach;
             endif;
@@ -150,7 +150,7 @@ class NFC_Widget extends \WP_Widget {
         echo "<h2>" . esc_html( 'Popular Category', 'nfc' ) . "</h2>";
         if ( !empty( $categories ) ):
             foreach ( $categories as $category ):
-                printf( '<li>%s <a data-cat-id="%s" href="#" class="follow-cat">%s</a></li>', esc_html( $category->name ), esc_attr( $category->term_id ), __( 'Follow', 'nfc' ) );
+                printf( '<li>%s <a data-cat-id="%s" href="javascript:void(0)" class="follow-cat">%s</a></li>', esc_html( $category->name ), esc_attr( $category->term_id ), __( 'Follow', 'nfc' ) );
             endforeach;
         endif;
         echo "</div>";

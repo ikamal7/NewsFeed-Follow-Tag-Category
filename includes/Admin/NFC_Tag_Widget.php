@@ -56,14 +56,14 @@ class NFC_Tag_Widget extends \WP_Widget {
         $current_user = wp_get_current_user();
         $saved_ids    = get_user_meta( $current_user->ID, 'post_tag_ids', true );
 
-        $id_to_add = isset( $_POST["data"] ) ? $_POST["data"] : '';
+        $id_to_add = isset( $_POST["data"] ) ? sanitize_text_field( $_POST["data"] ) : '';
 
         if ( in_array( $id_to_add, $saved_ids ) ) {
 
             if (  ( $key = array_search( $id_to_add, $saved_ids ) ) !== false ) {
                 unset( $saved_ids[$key] );
                 update_user_meta( $current_user->ID, 'post_tag_ids', $saved_ids );
-                return wp_send_json( ['value' => sanitize_key( 'unfollowed' )] );
+                return wp_send_json( ['value' => esc_attr( 'unfollowed' )] );
             }
 
         } else {
@@ -77,7 +77,7 @@ class NFC_Tag_Widget extends \WP_Widget {
 
             if ( update_user_meta( $current_user->ID, 'post_tag_ids', $saved_ids ) ) {
                 //echo $id_to_add;
-                return wp_send_json( ['value' => sanitize_key( 'followed' )] );
+                return wp_send_json( ['value' => esc_attr( 'followed' )] );
             } else {
                 echo __( 'Failed: Could not update user meta.', 'nfc' );
             }
@@ -134,22 +134,23 @@ class NFC_Tag_Widget extends \WP_Widget {
         echo "<ul class='nfc-tag-list'>";
 
         if ( is_user_logged_in() ):
-
+            echo "<div class='nfc-my-tag-list'>";
+            echo "<h2>" . __( "My tags", "nfc" ) . "</h2>";
             if ( !empty( $user_followed_ids ) ):
-                echo "<div class='nfc-my-tag-list'>";
-                echo "<h2>" . esc_html( "My tags", "nfc" ) . "</h2>";
+
                 foreach ( $followed_tags as $followed_tag ):
-                    printf( '<li>#%s <a data-tag-id="%s" href="#" class="follow-cat">%s</a></li>', esc_html( $followed_tag->name ), esc_attr( $followed_tag->term_id ), __( 'Unfollow', 'nfc' ) );
+                    printf( '<li>#%s <a data-tag-id="%s" href="javascript:void(0)" class="follow-cat">%s</a></li>', esc_html( $followed_tag->name ), esc_attr( $followed_tag->term_id ), __( 'Unfollow', 'nfc' ) );
                 endforeach;
-                echo "</div>";
+
             endif;
+            echo "</div>";
         endif;
 
         if ( !empty( $all_tags ) ):
             echo "<div class='nfc-all-tags-list'>";
-            echo "<h2>" . esc_html( "Popular tags", "nfc" ) . "</h2>";
+            echo "<h2>" . __( "Popular tags", "nfc" ) . "</h2>";
             foreach ( $all_tags as $single_tag ):
-                printf( '<li>#%s <a data-tag-id="%s" href="#" class="follow-cat">%s</a></li>', esc_html( $single_tag->name ), esc_attr( $single_tag->term_id ), __( 'Follow', 'nfc' ) );
+                printf( '<li>#%s <a data-tag-id="%s" href="javascript:void(0)" class="follow-cat">%s</a></li>', esc_html( $single_tag->name ), esc_attr( $single_tag->term_id ), __( 'Follow', 'nfc' ) );
             endforeach;
             echo "</div>";
         endif;
