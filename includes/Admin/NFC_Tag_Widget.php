@@ -56,14 +56,14 @@ class NFC_Tag_Widget extends \WP_Widget {
         $current_user = wp_get_current_user();
         $saved_ids    = get_user_meta( $current_user->ID, 'post_tag_ids', true );
 
-        $id_to_add = isset( $_POST["data"] ) ? sanitize_text_field( $_POST["data"] ) : '';
+        $id_to_add = isset( $_POST["data"] ) ? intval( $_POST["data"] ) : '';
 
         if ( in_array( $id_to_add, $saved_ids ) ) {
 
             if (  ( $key = array_search( $id_to_add, $saved_ids ) ) !== false ) {
                 unset( $saved_ids[$key] );
                 update_user_meta( $current_user->ID, 'post_tag_ids', $saved_ids );
-                return wp_send_json( ['value' => esc_attr( 'unfollowed' )] );
+                return wp_send_json( ['value' => __( 'unfollowed', 'nfc' )] );
             }
 
         } else {
@@ -76,8 +76,7 @@ class NFC_Tag_Widget extends \WP_Widget {
             array_push( $saved_ids, $id_to_add );
 
             if ( update_user_meta( $current_user->ID, 'post_tag_ids', $saved_ids ) ) {
-                //echo $id_to_add;
-                return wp_send_json( ['value' => esc_attr( 'followed' )] );
+                return wp_send_json( ['value' => __( 'followed', 'nfc' )] );
             } else {
                 echo __( 'Failed: Could not update user meta.', 'nfc' );
             }

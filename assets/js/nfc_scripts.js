@@ -22,7 +22,7 @@
                     $('.nfc-my-category-list').append(li)
                     setInterval(function(){
                         $(".nfc-all-category-list li a[data-cat-id="+catid+"]").parent('li').remove()
-                     },1000)
+                     },500)
                      console.log(response);
                      
                 }else{
@@ -33,7 +33,7 @@
                     $('.nfc-all-category-list').append(li)
                     setInterval(function(){
                         $(".nfc-my-category-list li a[data-cat-id="+catid+"]").parent('li').remove()
-                     },1000)
+                     },500)
                      
 
                 }
@@ -63,7 +63,7 @@
                      
                     setInterval(function(){
                        $(".nfc-all-tags-list li a[data-tag-id="+tag_id+"]").parent('li').remove()
-                    },1000)
+                    },500)
                     
                     console.log(li)
                 }else{
@@ -73,7 +73,7 @@
                     $('.nfc-all-tags-list').append(li)
                     setInterval(function(){
                         $(".nfc-my-tag-list li a[data-tag-id="+tag_id+"]").parent('li').remove()
-                     },1000)
+                     },500)
                 }
                 
                 
